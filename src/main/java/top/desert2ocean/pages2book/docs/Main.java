@@ -18,6 +18,6 @@ public class Main {
                 .addUrl(startUrl)
                 .addPipeline(pipeline)
                 .setScheduler(new FileCacheQueueScheduler("pages"))
-                .thread(1).run();
+                .thread(2).run();
     }
 }

@@ -5,6 +5,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.util.StringUtils;
+import top.desert2ocean.pages2book.core.config.ImageUrl;
 import top.desert2ocean.pages2book.core.config.UrlSection;
 import top.desert2ocean.pages2book.core.utils.UrlUtils;
 import us.codecraft.webmagic.Page;
@@ -13,6 +14,8 @@ import us.codecraft.webmagic.processor.PageProcessor;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -60,6 +63,22 @@ public class DocPageProcessor implements PageProcessor {
                 page.putField("html", content.html());
                 page.putField("serial", urlSecction.getSerial());
                 log.info("extract {} content.", url);
+
+                //处理图片
+                Elements imgs = content.getElementsByTag("img");
+                List<ImageUrl> imageUrls = new ArrayList<>();
+                for (Element img : imgs) {
+                    //处理不是data开头的
+                    String src = img.attr("src");
+                    if (!src.startsWith("data:")) {
+                        imageUrls.add(ImageUrl.builder().base(docsConfig.getBaseUrl()).src(src).build());
+                        log.info("add image {} for later process.", src);
+
+
+                    }
+                }
+
+                page.putField("images", imageUrls);
             }
         }
     }
