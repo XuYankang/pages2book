@@ -46,12 +46,19 @@ public class DocPageProcessor implements PageProcessor {
         Document document = page.getHtml().getDocument();
         processCatalog(page, document);
 
+        processContent(page, url, document);
+    }
+
+    private void processContent(Page page, String url, Document document) {
+        UrlSection urlSecction = urlConfig.get(page.getUrl().get());
+
         if (docsConfig.getContent() != null) {
             Elements contentElements = document.select(docsConfig.getContent().getCssQuery());
             if (contentElements.size() > 0) {
                 Element content = contentElements.get(0);
                 page.putField("title", urlConfig.get(url).getTitle());
                 page.putField("html", content.html());
+                page.putField("serial", urlSecction.getSerial());
                 log.info("extract {} content.", url);
             }
         }
@@ -61,6 +68,9 @@ public class DocPageProcessor implements PageProcessor {
         //find catalog
         String parentUrl = page.getUrl().get();
         UrlSection parentUrlSection = urlConfig.get(parentUrl);
+
+        int number = 0;
+
         if (docsConfig.getCatalog() != null) {
             Elements catalogElements = document.select(docsConfig.getCatalog().getCssQuery());
             if (catalogElements.size() > 0) {
@@ -75,11 +85,14 @@ public class DocPageProcessor implements PageProcessor {
                             URL targetUrl = new URL(baseUrl, href);
                             String finalUrl = targetUrl.toString();
                             String text = element.text();
+                            int finalNumber = number;
                             urlConfig.computeIfPresent(finalUrl, (u, us) -> {
                                 us.setTitle(text);
+                                us.setNumber(finalNumber);
                                 return us;
                             });
-                            urlConfig.putIfAbsent(finalUrl, UrlSection.builder().url(finalUrl).title(text).parent(parentUrlSection).build());
+                            urlConfig.putIfAbsent(finalUrl, UrlSection.builder().url(finalUrl).title(text).parent(parentUrlSection).number(finalNumber).build());
+                            number++;
                             page.addTargetRequest(finalUrl);
                             log.info("add {} to crawler list.", finalUrl);
                         } catch (MalformedURLException e) {
