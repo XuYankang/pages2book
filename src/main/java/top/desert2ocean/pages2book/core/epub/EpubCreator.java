@@ -5,7 +5,7 @@ import nl.siegmann.epublib.domain.*;
 import nl.siegmann.epublib.epub.EpubWriter;
 import nl.siegmann.epublib.service.MediatypeService;
 import org.apache.commons.io.FileUtils;
-import top.desert2ocean.pages2book.core.utils.FileResourceUtils;
+import top.desert2ocean.pages2book.core.utils.ResourceUtils;
 import top.desert2ocean.pages2book.docs.DocsConfig;
 
 import java.io.File;
@@ -28,7 +28,7 @@ public class EpubCreator {
     }
 
     public void create(DocsConfig docsConfig) throws MalformedURLException {
-        String userDir = FileResourceUtils.getUserDir();
+        String userDir = ResourceUtils.getUserDir();
         String subDir = docsConfig.getHost();
         try {
             // Create new Book
@@ -43,20 +43,17 @@ public class EpubCreator {
             metadata.addAuthor(new Author(docsConfig.getAuthor()));
 
             //list html
-            Collection<File> htmlFiles = FileUtils.listFiles(new File(userDir + FileResourceUtils.PATH_SEPERATOR + docsConfig.getSaveDir() + FileResourceUtils.PATH_SEPERATOR + subDir), new String[]{"html", "htm"}, false);
+            Collection<File> htmlFiles = FileUtils.listFiles(new File(userDir + ResourceUtils.PATH_SEPERATOR + docsConfig.getSaveDir() + ResourceUtils.PATH_SEPERATOR + subDir), new String[]{"html", "htm"}, false);
             List<File> list = new ArrayList<>(htmlFiles);
             list.sort(Comparator.comparing(File::getName));
             list.forEach(file -> {
                 try {
-                    book.addSection(file.getName(), getHtml(file));
-                } catch (IOException e) {
+                    book.addSection(file.getName(), getResource(file));
+                } catch (Exception e) {
                     log.error("get resource of {} error.", file.getAbsolutePath());
                     e.printStackTrace();
                 }
             });
-
-            //add image
-            book.getResources().add(getImage());
 
             // Create EpubWriter
             EpubWriter epubWriter = new EpubWriter();
@@ -69,15 +66,24 @@ public class EpubCreator {
         }
     }
 
-    public Resource getImage() throws IOException {
-        byte[] bytes = FileUtils.readFileToByteArray(new File("/Users/xuyankang/IdeaProjects/pages2book/pages/docs.gradle.org/img/android-studio-build-sync-popup.png"));
-        Resource resource = new Resource(bytes, MediatypeService.PNG);
-        return resource;
-    }
-
-    public Resource getHtml(File file) throws IOException {
+    public Resource getResource(File file) throws IOException {
         byte[] bytes = FileUtils.readFileToByteArray(file);
-        Resource resource = new Resource(bytes, MediatypeService.XHTML);
-        return resource;
+        String name = file.getName();
+        //找到后缀名
+        String fileType = ResourceUtils.getFileType(name);
+
+        switch (fileType) {
+            case "png":
+                return new Resource(bytes, MediatypeService.PNG);
+            case "html":
+            case "htm":
+                return new Resource(bytes, MediatypeService.XHTML);
+            case "jpg":
+            case "jpeg":
+                return new Resource(bytes, MediatypeService.JPG);
+            case "gif":
+                return new Resource(bytes, MediatypeService.GIF);
+        }
+        return null;
     }
 }

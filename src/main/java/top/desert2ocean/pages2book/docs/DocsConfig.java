@@ -12,6 +12,8 @@ public class DocsConfig {
      * 一定要斜杠结尾
      */
     private String baseUrl;
+
+    private String startUrl;
     /**
      * 是否包含在startPage内
      */

@@ -7,6 +7,7 @@ import org.jsoup.select.Elements;
 import org.springframework.util.StringUtils;
 import top.desert2ocean.pages2book.core.config.ImageUrl;
 import top.desert2ocean.pages2book.core.config.UrlSection;
+import top.desert2ocean.pages2book.core.utils.ResourceUtils;
 import top.desert2ocean.pages2book.core.utils.UrlUtils;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
@@ -14,8 +15,6 @@ import us.codecraft.webmagic.processor.PageProcessor;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -59,26 +58,30 @@ public class DocPageProcessor implements PageProcessor {
             Elements contentElements = document.select(docsConfig.getContent().getCssQuery());
             if (contentElements.size() > 0) {
                 Element content = contentElements.get(0);
+
+                //处理图片
+                Elements imgs = content.getElementsByTag("img");
+                for (Element img : imgs) {
+                    //处理不是data开头的
+                    String src = img.attr("src");
+                    if (!src.startsWith("data:")) {
+                        //将其替换为data类型
+                        ImageUrl imageUrl = ImageUrl.builder().base(docsConfig.getBaseUrl()).src(src).build();
+                        try {
+                            String newSrc = ResourceUtils.getImageStringFromRemote(imageUrl.getUrl().toString());
+                            img.attr("src", newSrc);
+                            log.info("download image {} and do src replace.", imageUrl);
+                        } catch (Exception e) {
+                            log.error("get image {} error.", imageUrl);
+                        }
+                    }
+                }
+
                 page.putField("title", urlConfig.get(url).getTitle());
                 page.putField("html", content.html());
                 page.putField("serial", urlSecction.getSerial());
                 log.info("extract {} content.", url);
 
-                //处理图片
-                Elements imgs = content.getElementsByTag("img");
-                List<ImageUrl> imageUrls = new ArrayList<>();
-                for (Element img : imgs) {
-                    //处理不是data开头的
-                    String src = img.attr("src");
-                    if (!src.startsWith("data:")) {
-                        imageUrls.add(ImageUrl.builder().base(docsConfig.getBaseUrl()).src(src).build());
-                        log.info("add image {} for later process.", src);
-
-
-                    }
-                }
-
-                page.putField("images", imageUrls);
             }
         }
     }
