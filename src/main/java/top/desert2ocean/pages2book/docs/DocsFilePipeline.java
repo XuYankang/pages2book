@@ -5,6 +5,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.util.StringUtils;
 import top.desert2ocean.pages2book.core.config.ImageUrl;
+import top.desert2ocean.pages2book.core.utils.FileResourceUtils;
 import us.codecraft.webmagic.ResultItems;
 import us.codecraft.webmagic.Task;
 import us.codecraft.webmagic.pipeline.Pipeline;
@@ -46,7 +47,7 @@ public class DocsFilePipeline extends FilePersistentBase implements Pipeline {
                 URL baseUrl = new URL(image.getBase());
                 URL targetUrl = new URL(baseUrl, image.getSrc());
                 InputStream in = targetUrl.openStream();
-                String relativelyPath = System.getProperty("user.dir");
+                String relativelyPath = FileResourceUtils.getUserDir();
                 byte[] bytes = IOUtils.toByteArray(in);
                 FileUtils.writeByteArrayToFile(getFile(relativelyPath + PATH_SEPERATOR + path + image.getSrc()), bytes);
                 log.info("save image {}.", image.getSrc());
