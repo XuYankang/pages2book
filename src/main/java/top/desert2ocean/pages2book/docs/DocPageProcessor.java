@@ -26,6 +26,8 @@ public class DocPageProcessor implements PageProcessor {
 
     private DocsConfig docsConfig;
 
+    private boolean catelogProcessed = false;
+
     private Map<String, UrlSection> urlConfig = new ConcurrentHashMap<>();
 
     private Site site = Site.me().setRetryTimes(3).setSleepTime(1).setTimeOut(10000);
@@ -87,9 +89,14 @@ public class DocPageProcessor implements PageProcessor {
     }
 
     private void processCatalog(Page page, Document document) {
-        //find catalog
-        String parentUrl = page.getUrl().get();
-        UrlSection parentUrlSection = urlConfig.get(parentUrl);
+
+        if (catelogProcessed) {
+            return;
+        }
+        catelogProcessed = true;
+//        //find catalog
+//        String parentUrl = page.getUrl().get();
+//        UrlSection parentUrlSection = urlConfig.get(parentUrl);
 
         int number = 0;
 
@@ -107,14 +114,13 @@ public class DocPageProcessor implements PageProcessor {
                             URL targetUrl = new URL(baseUrl, href);
                             String finalUrl = targetUrl.toString();
                             String text = element.text();
-                            int finalNumber = number;
+                            int finalNumber = ++number;
                             urlConfig.computeIfPresent(finalUrl, (u, us) -> {
                                 us.setTitle(text);
                                 us.setNumber(finalNumber);
                                 return us;
                             });
-                            urlConfig.putIfAbsent(finalUrl, UrlSection.builder().url(finalUrl).title(text).parent(parentUrlSection).number(finalNumber).build());
-                            number++;
+                            urlConfig.putIfAbsent(finalUrl, UrlSection.builder().url(finalUrl).title(text).number(finalNumber).build());
                             page.addTargetRequest(finalUrl);
                             log.info("add {} to crawler list.", finalUrl);
                         } catch (MalformedURLException e) {
@@ -124,6 +130,7 @@ public class DocPageProcessor implements PageProcessor {
                 }
             }
         }
+        log.info("catalog processed.");
     }
 
 

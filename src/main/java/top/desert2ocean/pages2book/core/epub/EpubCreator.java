@@ -24,10 +24,10 @@ public class EpubCreator {
         docsConfig.setTitle("gradle");
         docsConfig.setAuthor("Jacob");
         docsConfig.setBaseUrl("https://docs.gradle.org/current/userguide/");
-        new EpubCreator().create(docsConfig);
+        create(docsConfig);
     }
 
-    public void create(DocsConfig docsConfig) throws MalformedURLException {
+    public static void create(DocsConfig docsConfig) throws MalformedURLException {
         String userDir = ResourceUtils.getUserDir();
         String subDir = docsConfig.getHost();
         try {
@@ -66,7 +66,7 @@ public class EpubCreator {
         }
     }
 
-    public Resource getResource(File file) throws IOException {
+    public static Resource getResource(File file) throws IOException {
         byte[] bytes = FileUtils.readFileToByteArray(file);
         String name = file.getName();
         //找到后缀名

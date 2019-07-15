@@ -13,12 +13,13 @@ public class UrlSection {
     private UrlSection parent;
 
     public String getSerial() {
-        String serial = number + " ";
+        String format = String.format("%03d", number);
+        String serial = format;
         UrlSection p = parent;
         while (p != null) {
-            serial = p.number + "." + serial;
+            serial = format + "." + serial;
             p = p.parent;
         }
-        return serial;
+        return serial + " ";
     }
 }
