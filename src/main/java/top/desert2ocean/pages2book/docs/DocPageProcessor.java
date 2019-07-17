@@ -24,13 +24,13 @@ public class DocPageProcessor implements PageProcessor {
         this.docsConfig = docsConfig;
     }
 
-    private DocsConfig docsConfig;
+    private final DocsConfig docsConfig;
 
     private boolean catelogProcessed = false;
 
-    private Map<String, UrlSection> urlConfig = new ConcurrentHashMap<>();
+    private final Map<String, UrlSection> urlConfig = new ConcurrentHashMap<>();
 
-    private Site site = Site.me().setRetryTimes(3).setSleepTime(1).setTimeOut(10000);
+    private final Site site = Site.me().setRetryTimes(3).setSleepTime(1).setTimeOut(10000);
 
     @Override
     public void process(Page page) {

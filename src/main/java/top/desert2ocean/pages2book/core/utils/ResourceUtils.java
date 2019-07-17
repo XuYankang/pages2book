@@ -5,7 +5,7 @@ import net.dongliu.requests.Requests;
 import java.util.Base64;
 
 public class ResourceUtils {
-    public static String PATH_SEPERATOR = "/";
+    public static final String PATH_SEPERATOR = "/";
 
     public static String getUserDir() {
         String relativelyPath = System.getProperty("user.dir");

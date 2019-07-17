@@ -10,7 +10,7 @@ import java.io.IOException;
 @Slf4j
 public class DownloaderTest {
 
-    private String startUrl = "https://docs.docker.com/";
+    private final String startUrl = "https://docs.docker.com/";
 
     @Test
     public void testJSoup() throws IOException {
