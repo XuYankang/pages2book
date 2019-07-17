@@ -14,7 +14,7 @@ import java.net.MalformedURLException;
 public class Main {
 
     public static void main(String[] args) {
-        DocsConfig config = gradle();
+        DocsConfig config = docker();
         startCrawler(config);
 
     }
